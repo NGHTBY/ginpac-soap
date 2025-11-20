@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    WSDL para el servicio SOAP GINPAC-SOAP
+    RA-02: Contrato (WSDL) - Define formalmente todas las operaciones del servicio
+    
+    Este archivo WSDL define el contrato del servicio web SOAP con las 5 operaciones CRUD
+    para la gestión de pacientes de la Clínica SaludTotal.
+-->
+<definitions name="GINPAC-SOAP"
+    targetNamespace="http://localhost/ginpac-soap/public/pacientes.wsdl"
+    xmlns:tns="http://localhost/ginpac-soap/public/pacientes.wsdl"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns="http://schemas.xmlsoap.org/wsdl/">
+
+    <!-- 
+        TIPOS DE DATOS 
+        RA-02: Define la estructura de datos para los pacientes
+    -->
+    <types>
+        <xsd:schema targetNamespace="http://localhost/ginpac-soap/public/pacientes.wsdl">
+            <!-- 
+                RF-01 a RF-05: Estructura de datos del Paciente
+                Define todos los campos requeridos para las operaciones CRUD
+            -->
+            <xsd:complexType name="Paciente">
+                <xsd:all>
+                    <xsd:element name="cedula" type="xsd:string"/>
+                    <xsd:element name="nombres" type="xsd:string"/>
+                    <xsd:element name="apellidos" type="xsd:string"/>
+                    <xsd:element name="telefono" type="xsd:string"/>
+                    <xsd:element name="fecha_nacimiento" type="xsd:string"/>
+                </xsd:all>
+            </xsd:complexType>
+            
+            <!-- Tipo para el array de pacientes usado en listarPacientes -->
+            <xsd:complexType name="ArrayOfPacientes">
+                <xsd:sequence>
+                    <xsd:element name="item" type="tns:Paciente" minOccurs="0" maxOccurs="unbounded"/>
+                </xsd:sequence>
+            </xsd:complexType>
+        </xsd:schema>
+    </types>
+
+    <!-- 
+        MENSAJES DE REQUEST Y RESPONSE
+        RA-02: Define los mensajes de entrada y salida para cada operación
+    -->
+
+    <!-- RF-01: Mensajes para Crear Paciente -->
+    <message name="crearPacienteRequest">
+        <part name="cedula" type="xsd:string"/>
+        <part name="nombres" type="xsd:string"/>
+        <part name="apellidos" type="xsd:string"/>
+        <part name="telefono" type="xsd:string"/>
+        <part name="fecha_nacimiento" type="xsd:string"/>
+    </message>
+    <message name="crearPacienteResponse">
+        <part name="result" type="xsd:boolean"/>
+    </message>
+
+    <!-- RF-02: Mensajes para Buscar Paciente -->
+    <message name="buscarPacienteRequest">
+        <part name="cedula" type="xsd:string"/>
+    </message>
+    <message name="buscarPacienteResponse">
+        <part name="paciente" type="tns:Paciente"/>
+    </message>
+
+    <!-- RF-03: Mensajes para Listar Pacientes -->
+    <message name="listarPacientesRequest"/>
+    <message name="listarPacientesResponse">
+        <part name="pacientes" type="tns:ArrayOfPacientes"/>
+    </message>
+
+    <!-- RF-04: Mensajes para Actualizar Paciente -->
+    <message name="actualizarPacienteRequest">
+        <part name="cedula" type="xsd:string"/>
+        <part name="nombres" type="xsd:string"/>
+        <part name="apellidos" type="xsd:string"/>
+        <part name="telefono" type="xsd:string"/>
+        <part name="fecha_nacimiento" type="xsd:string"/>
+    </message>
+    <message name="actualizarPacienteResponse">
+        <part name="result" type="xsd:boolean"/>
+    </message>
+
+    <!-- RF-05: Mensajes para Eliminar Paciente -->
+    <message name="eliminarPacienteRequest">
+        <part name="cedula" type="xsd:string"/>
+    </message>
+    <message name="eliminarPacienteResponse">
+        <part name="result" type="xsd:boolean"/>
+    </message>
+
+    <!-- 
+        PORT TYPE - OPERACIONES DEL SERVICIO
+        RA-02: Define las 5 operaciones CRUD del servicio
+    -->
+    <portType name="PacientesPortType">
+        <!-- RF-01: Operación para crear paciente -->
+        <operation name="crearPaciente">
+            <input message="tns:crearPacienteRequest"/>
+            <output message="tns:crearPacienteResponse"/>
+        </operation>
+        
+        <!-- RF-02: Operación para buscar paciente por cédula -->
+        <operation name="buscarPaciente">
+            <input message="tns:buscarPacienteRequest"/>
+            <output message="tns:buscarPacienteResponse"/>
+        </operation>
+        
+        <!-- RF-03: Operación para listar todos los pacientes -->
+        <operation name="listarPacientes">
+            <input message="tns:listarPacientesRequest"/>
+            <output message="tns:listarPacientesResponse"/>
+        </operation>
+        
+        <!-- RF-04: Operación para actualizar paciente -->
+        <operation name="actualizarPaciente">
+            <input message="tns:actualizarPacienteRequest"/>
+            <output message="tns:actualizarPacienteResponse"/>
+        </operation>
+        
+        <!-- RF-05: Operación para eliminar paciente -->
+        <operation name="eliminarPaciente">
+            <input message="tns:eliminarPacienteRequest"/>
+            <output message="tns:eliminarPacienteResponse"/>
+        </operation>
+    </portType>
+
+    <!-- 
+        BINDING - PROTOCOLO SOAP
+        RA-02: Define cómo se comunican las operaciones via SOAP
+    -->
+    <binding name="PacientesBinding" type="tns:PacientesPortType">
+        <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+        
+        <!-- RF-01: Binding para crear paciente -->
+        <operation name="crearPaciente">
+            <soap:operation soapAction="http://localhost/ginpac-soap/public/soap-server.php#crearPaciente"/>
+            <input>
+                <soap:body use="encoded" namespace="http://localhost/ginpac-soap/public/pacientes.wsdl" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </input>
+            <output>
+                <soap:body use="encoded" namespace="http://localhost/ginpac-soap/public/pacientes.wsdl" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </output>
+        </operation>
+        
+        <!-- RF-02: Binding para buscar paciente -->
+        <operation name="buscarPaciente">
+            <soap:operation soapAction="http://localhost/ginpac-soap/public/soap-server.php#buscarPaciente"/>
+            <input>
+                <soap:body use="encoded" namespace="http://localhost/ginpac-soap/public/pacientes.wsdl" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </input>
+            <output>
+                <soap:body use="encoded" namespace="http://localhost/ginpac-soap/public/pacientes.wsdl" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </output>
+        </operation>
+        
+        <!-- RF-03: Binding para listar pacientes -->
+        <operation name="listarPacientes">
+            <soap:operation soapAction="http://localhost/ginpac-soap/public/soap-server.php#listarPacientes"/>
+            <input>
+                <soap:body use="encoded" namespace="http://localhost/ginpac-soap/public/pacientes.wsdl" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </input>
+            <output>
+                <soap:body use="encoded" namespace="http://localhost/ginpac-soap/public/pacientes.wsdl" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </output>
+        </operation>
+        
+        <!-- RF-04: Binding para actualizar paciente -->
+        <operation name="actualizarPaciente">
+            <soap:operation soapAction="http://localhost/ginpac-soap/public/soap-server.php#actualizarPaciente"/>
+            <input>
+                <soap:body use="encoded" namespace="http://localhost/ginpac-soap/public/pacientes.wsdl" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </input>
+            <output>
+                <soap:body use="encoded" namespace="http://localhost/ginpac-soap/public/pacientes.wsdl" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </output>
+        </operation>
+        
+        <!-- RF-05: Binding para eliminar paciente -->
+        <operation name="eliminarPaciente">
+            <soap:operation soapAction="http://localhost/ginpac-soap/public/soap-server.php#eliminarPaciente"/>
+            <input>
+                <soap:body use="encoded" namespace="http://localhost/ginpac-soap/public/pacientes.wsdl" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </input>
+            <output>
+                <soap:body use="encoded" namespace="http://localhost/ginpac-soap/public/pacientes.wsdl" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+            </output>
+        </operation>
+    </binding>
+
+    <!-- 
+        SERVICIO - ENDPOINT
+        RA-02: Define la ubicación del servicio SOAP
+    -->
+    <service name="PacientesService">
+        <port name="PacientesPort" binding="tns:PacientesBinding">
+            <!-- RA-03: URL donde está publicado el servidor SOAP -->
+            <soap:address location="http://localhost/ginpac-soap/public/soap-server.php"/>
+        </port>
+    </service>
+</definitions>

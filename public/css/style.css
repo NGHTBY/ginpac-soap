@@ -1,0 +1,634 @@
+/* ========================================================================== */
+/* VARIABLES CSS PARA TEMA CLARO Y OSCURO */
+/* ========================================================================== */
+:root {
+    /* Colores base - Tema Claro (default) */
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --success-color: #27ae60;
+    --danger-color: #e74c3c;
+    --warning-color: #f39c12;
+    --info-color: #17a2b8;
+    
+    /* Colores de fondo - Tema Claro */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-card: #ffffff;
+    --bg-header: #ffffff;
+    --bg-footer: #f8f9fa;
+    
+    /* Colores de texto - Tema Claro */
+    --text-primary: #333333;
+    --text-secondary: #666666;
+    --text-muted: #999999;
+    --text-light: #ffffff;
+    
+    /* Colores de bordes - Tema Claro */
+    --border-color: #dee2e6;
+    --border-light: #e9ecef;
+    
+    /* Sombras - Tema Claro */
+    --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
+    --shadow-card: 0 4px 15px rgba(0, 0, 0, 0.1);
+    
+    /* Colores de botones - Tema Claro */
+    --btn-primary-bg: var(--secondary-color);
+    --btn-primary-hover: #2980b9;
+    --btn-secondary-bg: #6c757d;
+    --btn-secondary-hover: #545b62;
+}
+
+/* ========================================================================== */
+/* TEMA OSCURO */
+/* ========================================================================== */
+body.dark-theme {
+    /* Colores de fondo - Tema Oscuro */
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --bg-card: #2d2d2d;
+    --bg-header: #2d2d2d;
+    --bg-footer: #1a1a1a;
+    
+    /* Colores de texto - Tema Oscuro */
+    --text-primary: #e0e0e0;
+    --text-secondary: #b0b0b0;
+    --text-muted: #888888;
+    --text-light: #ffffff;
+    
+    /* Colores de bordes - Tema Oscuro */
+    --border-color: #404040;
+    --border-light: #4a4a4a;
+    
+    /* Sombras - Tema Oscuro */
+    --shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.4);
+    --shadow-card: 0 4px 15px rgba(0, 0, 0, 0.3);
+    
+    /* Colores de botones - Tema Oscuro */
+    --btn-primary-bg: #2980b9;
+    --btn-primary-hover: #3498db;
+    --btn-secondary-bg: #5a6268;
+    --btn-secondary-hover: #6c757d;
+}
+
+/* ========================================================================== */
+/* ESTILOS BASE */
+/* ========================================================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    color: var(--text-primary);
+    background-color: var(--bg-primary);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ========================================================================== */
+/* HEADER Y BOTÓN DE TEMA */
+/* ========================================================================== */
+header {
+    background: var(--bg-header);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+    text-align: center;
+    position: relative;
+    border: 1px solid var(--border-color);
+}
+
+.header-top {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
+
+.theme-btn {
+    background: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 25px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+}
+
+.theme-btn:hover {
+    background: var(--btn-primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+.theme-btn i {
+    font-size: 1rem;
+}
+
+header h1 {
+    color: var(--secondary-color);
+    margin-bottom: 0.5rem;
+    font-size: 2.5rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+header p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+/* ========================================================================== */
+/* CONTENIDO PRINCIPAL */
+/* ========================================================================== */
+main {
+    flex: 1;
+}
+
+.main-menu {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    width: 100%;
+    max-width: 800px;
+}
+
+.menu-card {
+    background: var(--bg-card);
+    padding: 2.5rem 2rem;
+    border-radius: 15px;
+    box-shadow: var(--shadow-card);
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-light);
+    position: relative;
+    overflow: hidden;
+}
+
+.menu-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--secondary-color), var(--success-color));
+}
+
+.menu-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-hover);
+}
+
+.menu-card h2 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.menu-card p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+/* ========================================================================== */
+/* BOTONES */
+/* ========================================================================== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.btn-primary {
+    background: var(--btn-primary-bg);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--btn-primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.btn-secondary {
+    background: var(--btn-secondary-bg);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: var(--btn-secondary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.btn-back {
+    background: transparent;
+    color: var(--secondary-color);
+    border: 2px solid var(--secondary-color);
+    padding: 8px 16px;
+    font-size: 0.9rem;
+}
+
+.btn-back:hover {
+    background: var(--secondary-color);
+    color: white;
+}
+
+.btn-edit {
+    background: var(--warning-color);
+    color: white;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+.btn-edit:hover {
+    background: #e67e22;
+    transform: translateY(-1px);
+}
+
+.btn-delete {
+    background: var(--danger-color);
+    color: white;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+.btn-delete:hover {
+    background: #c0392b;
+    transform: translateY(-1px);
+}
+
+/* ========================================================================== */
+/* FORMULARIOS (PARA OTRAS VISTAS) */
+/* ========================================================================== */
+.patient-form {
+    background: var(--bg-card);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    max-width: 600px;
+    margin: 0 auto;
+    border: 1px solid var(--border-color);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.form-group small {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+}
+
+/* ========================================================================== */
+/* ALERTAS */
+/* ========================================================================== */
+.alert {
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+    border: 1px solid transparent;
+}
+
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    border-color: #c3e6cb;
+}
+
+.dark-theme .alert-success {
+    background: #0f5132;
+    color: #d1e7dd;
+    border-color: #0c4128;
+}
+
+.alert-error {
+    background: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
+}
+
+.dark-theme .alert-error {
+    background: #842029;
+    color: #f8d7da;
+    border-color: #6a1a21;
+}
+
+/* ========================================================================== */
+/* TABLA */
+/* ========================================================================== */
+.table-container {
+    background: var(--bg-card);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.patients-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.patients-table th,
+.patients-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.patients-table th {
+    background: var(--primary-color);
+    color: white;
+    font-weight: 600;
+}
+
+.patients-table tr:hover {
+    background: var(--bg-secondary);
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.delete-form {
+    margin: 0;
+}
+
+/* ========================================================================== */
+/* ESTADO VACÍO */
+/* ========================================================================== */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    background: var(--bg-card);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+}
+
+.empty-state p {
+    margin-bottom: 1.5rem;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+/* ========================================================================== */
+/* FOOTER */
+/* ========================================================================== */
+footer {
+    text-align: center;
+    padding: 2rem;
+    margin-top: 2rem;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-footer);
+    border-radius: 10px;
+}
+
+.theme-info {
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    color: var(--text-muted);
+}
+
+/* ========================================================================== */
+/* RESPONSIVE */
+/* ========================================================================== */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .header-top {
+        position: static;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: center;
+    }
+    
+    .menu-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .actions {
+        flex-direction: column;
+    }
+    
+    .patients-table {
+        font-size: 0.9rem;
+    }
+    
+    .patients-table th,
+    .patients-table td {
+        padding: 0.5rem;
+    }
+    
+    header h1 {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .theme-btn {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+    
+    .theme-text {
+        display: none;
+    }
+    
+    .menu-card {
+        padding: 1.5rem 1rem;
+    }
+}
+/* ========================================================================== */
+/* ESTILOS ADICIONALES PARA FORMULARIOS */
+/* ========================================================================== */
+
+.error-field {
+    border-color: var(--danger-color) !important;
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1) !important;
+}
+
+.error-text {
+    color: var(--danger-color) !important;
+    font-weight: 600;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+.disabled-field {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-muted) !important;
+    cursor: not-allowed !important;
+}
+
+.success-message {
+    background: #d4edda;
+    color: #155724;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #c3e6cb;
+}
+
+.dark-theme .success-message {
+    background: #0f5132;
+    color: #d1e7dd;
+    border-color: #0c4128;
+}
+
+/* Estilos adicionales para la vista listar */
+.table-header {
+    background: var(--bg-secondary);
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table-header h3 {
+    margin: 0;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.table-info {
+    background: var(--bg-secondary);
+    padding: 1rem;
+    border-radius: 0 0 10px 10px;
+    text-align: center;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--border-color);
+}
+
+.table-info p {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+/* Mejoras para las acciones en tabla */
+.actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.actions .btn {
+    white-space: nowrap;
+}
+
+/* Responsive para tabla */
+@media (max-width: 768px) {
+    .table-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    .actions {
+        flex-direction: column;
+    }
+    
+    .actions .btn {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+    }
+}

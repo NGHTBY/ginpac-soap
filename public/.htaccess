@@ -1,0 +1,39 @@
+# ─────────────────────────────
+# Forzar tipo XML y PHP para el SOAP
+# ─────────────────────────────
+<FilesMatch "\.wsdl$">
+    ForceType text/xml
+</FilesMatch>
+
+<Files "soap-server.php">
+    SetHandler application/x-httpd-php
+</Files>
+
+# ─────────────────────────────
+# Reglas estándar de Laravel
+# ─────────────────────────────
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    # Manejar encabezado Authorization
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Quitar barra final
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Evitar que Laravel intercepte el servidor SOAP
+    RewriteCond %{REQUEST_URI} ^/soap-server\.php$ [NC]
+    RewriteRule .* - [L]
+
+    # Enviar el resto de peticiones a index.php
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
