@@ -132,14 +132,10 @@ class PacienteController extends Controller
                             
                             // Actualizar fecha_nacimiento
                             if (isset($paciente->fechaNacimiento)) {
-                                unset($paciente->fechaNacimiento);
-                            }
-                           if (isset($paciente->fechaNacimiento)) {
     unset($paciente->fechaNacimiento);
 }
 
 $paciente->fecha_nacimiento = htmlspecialchars($fecha_nacimiento);
-                            }
                             
                             $encontrado = true;
                             break;
@@ -448,41 +444,4 @@ private function sanitizeForCSV($data)
     return $data;
 }
 
-/**
- * Registra actividades en el log del sistema con más detalles
- */
-private function logActivity($action, $details = '')
-{
-    $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'Desconocido';
-    $method = $_SERVER['REQUEST_METHOD'] ?? 'CLI';
-    $uri = $_SERVER['REQUEST_URI'] ?? 'N/A';
-    
-    $logMessage = sprintf(
-        "[%s] IP: %s | Method: %s | URI: %s | Action: %s | Details: %s | User-Agent: %s",
-        date('Y-m-d H:i:s'),
-        request()->ip(),
-        $method,
-        $uri,
-        $action,
-        $details,
-        substr($userAgent, 0, 100) // Limitar longitud del user agent
-    );
-    
-    // Crear directorio de logs si no existe
-    $logDir = storage_path('logs');
-    if (!file_exists($logDir)) {
-        mkdir($logDir, 0755, true);
-    }
-    
-    $logFile = $logDir . '/ginpac_activity.log';
-    
-    // Rotación de logs: si el archivo es mayor a 10MB, crear uno nuevo
-    if (file_exists($logFile) && filesize($logFile) > 10 * 1024 * 1024) {
-        $backupFile = $logDir . '/ginpac_activity_' . date('Y-m-d_His') . '.log';
-        rename($logFile, $backupFile);
-    }
-    
-    file_put_contents($logFile, $logMessage . PHP_EOL, FILE_APPEND);
-}
-}
 ?>
