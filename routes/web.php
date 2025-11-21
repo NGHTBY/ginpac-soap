@@ -39,6 +39,9 @@ Route::get('/wsdl', function() {
         return response(file_get_contents($wsdlFile), 200)
             ->header('Content-Type', 'text/xml');
     }
-    abort(404, 'WSDL no encontrado');
+    abort(404, 'WSDL no encontrado');  
 });
+
+Route::get('/exportar-pacientes', [PacienteController::class, 'exportPacientes'])
+    ->name('pacientes.export');
 ?>
