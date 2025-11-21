@@ -112,12 +112,6 @@ class PacienteController extends Controller
     }
 }
            
-                    return $pacientes;
-                } catch (\Exception $e) {
-                    error_log("Error al listar pacientes: " . $e->getMessage());
-                    return [];
-                }
-            }
             
             public function actualizarPaciente($cedulaOriginal, $nuevaCedula, $nombres, $apellidos, $telefono, $fecha_nacimiento) {
                 try {
