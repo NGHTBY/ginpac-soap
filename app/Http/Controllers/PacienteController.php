@@ -134,10 +134,11 @@ class PacienteController extends Controller
                             if (isset($paciente->fechaNacimiento)) {
                                 unset($paciente->fechaNacimiento);
                             }
-                            if (isset($paciente->fecha_nacimiento)) {
-                                $paciente->fecha_nacimiento = htmlspecialchars($fecha_nacimiento);
-                            } else {
-                                $paciente->addChild('fecha_nacimiento', htmlspecialchars($fecha_nacimiento));
+                           if (isset($paciente->fechaNacimiento)) {
+    unset($paciente->fechaNacimiento);
+}
+
+$paciente->fecha_nacimiento = htmlspecialchars($fecha_nacimiento);
                             }
                             
                             $encontrado = true;
