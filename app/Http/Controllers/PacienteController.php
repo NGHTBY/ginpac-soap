@@ -222,64 +222,103 @@ class PacienteController extends Controller
     }
     
     public function store(Request $request)
-    {
-        $request->validate([
-            'cedula' => 'required|string|max:20',
-            'nombres' => 'required|string|max:100',
-            'apellidos' => 'required|string|max:100',
-            'telefono' => 'required|string|max:15',
-            'fecha_nacimiento' => 'required|date'
-        ]);
+{
+    $request->validate([
+        'cedula' => 'required|string|max:20',
+        'nombres' => 'required|string|max:100|regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/',
+        'apellidos' => 'required|string|max:100|regex:/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/',
+        'telefono' => 'required|string|max:15|regex:/^[0-9+\-\s()]+$/',
+        'fecha_nacimiento' => 'required|date|before:today'
+    ]);
+
+    // Validación personalizada de cédula
+    if (!$this->validateCedula($request->cedula)) {
+        return back()->with('error', 'La cédula debe contener solo números y tener entre 8-12 dígitos.')
+                    ->withInput();
+    }
+
+    // Validar que el paciente no sea menor de 18 años
+    $fechaNacimiento = new \DateTime($request->fecha_nacimiento);
+    $hoy = new \DateTime();
+    $edad = $hoy->diff($fechaNacimiento)->y;
+    
+    if ($edad < 18) {
+        return back()->with('error', 'El paciente debe ser mayor de 18 años.')
+                    ->withInput();
+    }
+
+    try {
+        $result = $this->soapClient->crearPaciente(
+            $request->cedula,
+            trim($request->nombres),
+            trim($request->apellidos),
+            $request->telefono,
+            $request->fecha_nacimiento
+        );
         
-        try {
-            $result = $this->soapClient->crearPaciente(
-                $request->cedula,
-                $request->nombres,
-                $request->apellidos,
-                $request->telefono,
-                $request->fecha_nacimiento
-            );
+        if ($result) {
+            // Log de actividad exitosa
+            $this->logActivity('Paciente creado exitosamente', "Cédula: {$request->cedula}, Nombre: {$request->nombres} {$request->apellidos}");
             
-            if ($result) {
-                return redirect()->route('pacientes.list')
-                    ->with('success', 'Paciente registrado exitosamente.');
-            } else {
-                return back()->with('error', 'Error al registrar paciente. La cédula puede ya existir.');
-            }
-        } catch (\Exception $e) {
-            return back()->with('error', 'Error de conexión: ' . $e->getMessage());
-        }
-    }
-    
-    public function list()
-    {
-        try {
-            $pacientes = $this->soapClient->listarPacientes();
-            return view('listar', compact('pacientes'));
-        } catch (\Exception $e) {
-            error_log('Error al listar pacientes: ' . $e->getMessage());
-            return view('listar', ['pacientes' => []])
-                ->with('error', 'Error al cargar pacientes: ' . $e->getMessage());
-        }
-    }
-    
-    public function edit($cedula)
-    {
-        try {
-            $paciente = $this->soapClient->buscarPaciente($cedula);
-            
-            if (!$paciente) {
-                return redirect()->route('pacientes.list')
-                    ->with('error', 'Paciente no encontrado.');
-            }
-            
-            return view('editar', compact('paciente'));
-        } catch (\Exception $e) {
-            error_log('Error al editar paciente: ' . $e->getMessage());
             return redirect()->route('pacientes.list')
-                ->with('error', 'Error al cargar paciente: ' . $e->getMessage());
+                ->with('success', 'Paciente registrado exitosamente.');
+        } else {
+            // Log de error por cédula duplicada
+            $this->logActivity('Intento de crear paciente con cédula duplicada', "Cédula: {$request->cedula}");
+            
+            return back()->with('error', 'Error al registrar paciente. La cédula ya existe en el sistema.')
+                        ->withInput();
         }
+    } catch (\Exception $e) {
+        // Log de excepción
+        $this->logActivity('Excepción al crear paciente', "Error: " . $e->getMessage());
+        
+        return back()->with('error', 'Error de conexión con el servidor: ' . $e->getMessage())
+                    ->withInput();
     }
+}
+
+/**
+ * Valida el formato de la cédula
+ * - Solo números
+ * - Entre 8 y 12 dígitos
+ */
+private function validateCedula($cedula)
+{
+    // Eliminar espacios y caracteres especiales
+    $cedulaLimpia = preg_replace('/[^0-9]/', '', $cedula);
+    
+    // Validar longitud
+    if (strlen($cedulaLimpia) < 8 || strlen($cedulaLimpia) > 12) {
+        return false;
+    }
+    
+    // Validar que solo contenga números
+    if (!ctype_digit($cedulaLimpia)) {
+        return false;
+    }
+    
+    return true;
+}
+
+/**
+ * Registra actividades en el log del sistema
+ */
+private function logActivity($action, $details = '')
+{
+    $logMessage = date('Y-m-d H:i:s') . " - IP: " . request()->ip() . " - {$action}";
+    if ($details) {
+        $logMessage .= " - Detalles: {$details}";
+    }
+    
+    // Crear directorio de logs si no existe
+    $logDir = storage_path('logs');
+    if (!file_exists($logDir)) {
+        mkdir($logDir, 0755, true);
+    }
+    
+    file_put_contents(storage_path('logs/ginpac_activity.log'), $logMessage . PHP_EOL, FILE_APPEND);
+}
     
     public function update(Request $request, $cedula)
     {
