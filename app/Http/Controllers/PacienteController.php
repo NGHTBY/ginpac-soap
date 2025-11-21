@@ -103,7 +103,14 @@ class PacienteController extends Controller
                             'fecha_nacimiento' => $this->getFechaNacimiento($paciente)
                         ];
                     }
-                    
+                    private function validateCedula($cedula)
+{
+    // Validar que la cédula solo contenga números y tenga entre 8-12 dígitos
+    if (!preg_match('/^\d{8,12}$/', $cedula)) {
+        return false;
+    }
+    return true;
+}
                     return $pacientes;
                 } catch (\Exception $e) {
                     error_log("Error al listar pacientes: " . $e->getMessage());
