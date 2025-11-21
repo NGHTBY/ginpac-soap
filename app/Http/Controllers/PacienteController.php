@@ -86,31 +86,32 @@ class PacienteController extends Controller
             }
             
             public function listarPacientes() {
-                try {
-                    if (!file_exists($this->xmlFile)) {
-                        return [];
-                    }
-                    
-                    $xml = simplexml_load_file($this->xmlFile);
-                    $pacientes = [];
-                    
-                    foreach ($xml->paciente as $paciente) {
-                        $pacientes[] = [
-                            'cedula' => (string)$paciente->cedula,
-                            'nombres' => (string)$paciente->nombres,
-                            'apellidos' => (string)$paciente->apellidos,
-                            'telefono' => (string)$paciente->telefono,
-                            'fecha_nacimiento' => $this->getFechaNacimiento($paciente)
-                        ];
-                    }
-                    private function validateCedula($cedula)
-{
-    // Validar que la cédula solo contenga números y tenga entre 8-12 dígitos
-    if (!preg_match('/^\d{8,12}$/', $cedula)) {
-        return false;
+    try {
+        if (!file_exists($this->xmlFile)) {
+            return [];
+        }
+
+        $xml = simplexml_load_file($this->xmlFile);
+        $pacientes = [];
+
+        foreach ($xml->paciente as $paciente) {
+            $pacientes[] = [
+                'cedula' => (string)$paciente->cedula,
+                'nombres' => (string)$paciente->nombres,
+                'apellidos' => (string)$paciente->apellidos,
+                'telefono' => (string)$paciente->telefono,
+                'fecha_nacimiento' => $this->getFechaNacimiento($paciente)
+            ];
+        }
+
+        return $pacientes;
+        
+    } catch (\Exception $e) {
+        error_log("Error al listar pacientes: " . $e->getMessage());
+        return [];
     }
-    return true;
 }
+           
                     return $pacientes;
                 } catch (\Exception $e) {
                     error_log("Error al listar pacientes: " . $e->getMessage());
