@@ -382,5 +382,112 @@ private function logActivity($action, $details = '')
                 ->with('error', 'Error de conexión: ' . $e->getMessage());
         }
     }
+
+    /**
+ * Exporta todos los pacientes a formato CSV
+ * 
+ * @return \Illuminate\Http\Response
+ */
+public function exportPacientes()
+{
+    try {
+        $pacientes = $this->soapClient->listarPacientes();
+        
+        // Cabeceras del CSV
+        $csvData = "Cédula,Nombres,Apellidos,Teléfono,Fecha Nacimiento,Edad\n";
+        
+        foreach ($pacientes as $paciente) {
+            // Calcular edad
+            $fechaNac = new \DateTime($paciente['fecha_nacimiento']);
+            $hoy = new \DateTime();
+            $edad = $hoy->diff($fechaNac)->y;
+            
+            // Sanitizar datos para CSV
+            $cedula = $this->sanitizeForCSV($paciente['cedula']);
+            $nombres = $this->sanitizeForCSV($paciente['nombres']);
+            $apellidos = $this->sanitizeForCSV($paciente['apellidos']);
+            $telefono = $this->sanitizeForCSV($paciente['telefono']);
+            $fechaNacimiento = $this->sanitizeForCSV($paciente['fecha_nacimiento']);
+            
+            $csvData .= "\"{$cedula}\",\"{$nombres}\",\"{$apellidos}\",\"{$telefono}\",\"{$fechaNacimiento}\",\"{$edad} años\"\n";
+        }
+        
+        // Log de exportación exitosa
+        $this->logActivity('Exportación CSV realizada', "Total de pacientes exportados: " . count($pacientes));
+        
+        // Devolver archivo CSV
+        return response($csvData)
+            ->header('Content-Type', 'text/csv; charset=utf-8')
+            ->header('Content-Disposition', 'attachment; filename="pacientes_clinica_' . date('Y-m-d_H-i') . '.csv"')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
+            
+    } catch (\Exception $e) {
+        // Log de error en exportación
+        $this->logActivity('Error en exportación CSV', "Error: " . $e->getMessage());
+        
+        return redirect()->route('pacientes.list')
+            ->with('error', 'Error al exportar pacientes: ' . $e->getMessage());
+    }
+}
+
+/**
+ * Sanitiza datos para formato CSV
+ * Escapa comillas y caracteres especiales
+ */
+private function sanitizeForCSV($data)
+{
+    if ($data === null) {
+        return '';
+    }
+    
+    // Escapar comillas dobles duplicándolas
+    $data = str_replace('"', '""', $data);
+    
+    // Eliminar saltos de línea y retornos de carro
+    $data = str_replace(["\r", "\n"], ' ', $data);
+    
+    // Limpiar espacios en blanco excesivos
+    $data = trim(preg_replace('/\s+/', ' ', $data));
+    
+    return $data;
+}
+
+/**
+ * Registra actividades en el log del sistema con más detalles
+ */
+private function logActivity($action, $details = '')
+{
+    $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'Desconocido';
+    $method = $_SERVER['REQUEST_METHOD'] ?? 'CLI';
+    $uri = $_SERVER['REQUEST_URI'] ?? 'N/A';
+    
+    $logMessage = sprintf(
+        "[%s] IP: %s | Method: %s | URI: %s | Action: %s | Details: %s | User-Agent: %s",
+        date('Y-m-d H:i:s'),
+        request()->ip(),
+        $method,
+        $uri,
+        $action,
+        $details,
+        substr($userAgent, 0, 100) // Limitar longitud del user agent
+    );
+    
+    // Crear directorio de logs si no existe
+    $logDir = storage_path('logs');
+    if (!file_exists($logDir)) {
+        mkdir($logDir, 0755, true);
+    }
+    
+    $logFile = $logDir . '/ginpac_activity.log';
+    
+    // Rotación de logs: si el archivo es mayor a 10MB, crear uno nuevo
+    if (file_exists($logFile) && filesize($logFile) > 10 * 1024 * 1024) {
+        $backupFile = $logDir . '/ginpac_activity_' . date('Y-m-d_His') . '.log';
+        rename($logFile, $backupFile);
+    }
+    
+    file_put_contents($logFile, $logMessage . PHP_EOL, FILE_APPEND);
+}
 }
 ?>
