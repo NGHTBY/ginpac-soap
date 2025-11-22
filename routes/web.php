@@ -30,6 +30,26 @@ Route::put('/editar/{cedula}', [PacienteController::class, 'update'])->name('pac
 // RF-10: Flujo de Eliminación - Ruta para eliminar pacientes
 Route::delete('/eliminar/{cedula}', [PacienteController::class, 'destroy'])->name('pacientes.destroy');
 
+// ===============================================
+// RF-11: Sistema de Backups
+// ===============================================
+
+// Crear backup
+Route::get('/backup/crear', [PacienteController::class, 'backupPacientes'])->name('backup.crear');
+
+// Listar backups disponibles
+Route::get('/backup/listar', [PacienteController::class, 'listarBackups'])->name('backup.listar');
+
+// Restaurar backup seleccionado
+Route::post('/backup/restaurar', [PacienteController::class, 'restaurarBackup'])->name('backup.restaurar');
+
+// Backup automático
+Route::get('/backup/automatico', [PacienteController::class, 'backupAutomatico'])->name('backup.automatico');
+
+// ===============================================
+// Rutas Técnicas del Servidor SOAP
+// ===============================================
+
 // Ruta directa al servidor SOAP (para testing y WSDL)
 Route::get('/soap-server', function() {
     require_once public_path('soap-server.php');
@@ -45,6 +65,8 @@ Route::get('/wsdl', function() {
     abort(404, 'WSDL no encontrado');  
 });
 
+// Exportación masiva
 Route::get('/exportar-pacientes', [PacienteController::class, 'exportPacientes'])
     ->name('pacientes.export');
+
 ?>
