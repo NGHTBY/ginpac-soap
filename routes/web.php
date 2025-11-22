@@ -20,6 +20,9 @@ Route::post('/crear', [PacienteController::class, 'store'])->name('pacientes.sto
 // RF-08: Flujo de Listado - Ruta para ver todos los pacientes
 Route::get('/listar', [PacienteController::class, 'list'])->name('pacientes.list');
 
+// Ruta para el dashboard de estadísticas
+Route::get('/dashboard', [PacienteController::class, 'dashboard'])->name('pacientes.dashboard');
+
 // RF-09: Flujo de Edición - Rutas para editar pacientes
 Route::get('/editar/{cedula}', [PacienteController::class, 'edit'])->name('pacientes.edit');
 Route::put('/editar/{cedula}', [PacienteController::class, 'update'])->name('pacientes.update');
