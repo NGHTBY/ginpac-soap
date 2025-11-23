@@ -1,20 +1,26 @@
+public/
+pacientes.xml
 <?xml version="1.0" encoding="UTF-8"?>
 <pacientes>
-    <!-- 
-
-    -->
-    <paciente>
-        <cedula>123456789</cedula>
-        <nombres>Juan Carlos</nombres>
-        <apellidos>Pérez García</apellidos>
-        <telefono>3001234567</telefono>
-        <fecha_nacimiento>1990-05-15</fecha_nacimiento>
-    </paciente>
     <paciente>
         <cedula>987654321</cedula>
         <nombres>María Elena</nombres>
         <apellidos>Rodríguez López</apellidos>
         <telefono>3109876543</telefono>
         <fecha_nacimiento>1985-12-20</fecha_nacimiento>
+    </paciente>
+    <paciente>   
+        <cedula>37345244</cedula>
+        <nombres>Andres Fabian</nombres>
+        <apellidos>Salazar Cuevas</apellidos>
+        <telefono>3145526789</telefono>
+        <fecha_nacimiento>2002-02-14</fecha_nacimiento>
+    </paciente>
+    <paciente>
+        <cedula>35123822</cedula>
+        <nombres>Sonia Maria</nombres>
+        <apellidos>Cabellero Sanchez</apellidos>
+        <telefono>3136432151</telefono>
+        <fecha_nacimiento>2004-06-15</fecha_nacimiento>
     </paciente>
 </pacientes>
