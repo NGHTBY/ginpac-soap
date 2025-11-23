@@ -160,11 +160,19 @@
                                     <p>Cédula: {{ $paciente['cedula'] }}</p>
                                     <span class="patient-age">
                                         @php
-                                            $fechaNac = new DateTime($paciente['fecha_nacimiento']);
-                                            $hoy = new DateTime();
-                                            $edad = $hoy->diff($fechaNac)->y;
+                                            if(!empty($paciente['fecha_nacimiento'])) {
+                                                try {
+                                                    $fechaNac = new DateTime($paciente['fecha_nacimiento']);
+                                                    $hoy = new DateTime();
+                                                    $edad = $hoy->diff($fechaNac)->y;
+                                                    echo $edad . ' años';
+                                                } catch (Exception $e) {
+                                                    echo 'N/A';
+                                                }
+                                            } else {
+                                                echo 'N/A';
+                                            }
                                         @endphp
-                                        {{ $edad }} años
                                     </span>
                                 </div>
                             </div>
@@ -202,13 +210,14 @@
 
     <!-- Script para los gráficos -->
     <script>
+        // @ts-nocheck
         document.addEventListener('DOMContentLoaded', function() {
             // Datos para el gráfico de distribución de edad
             const distributionData = {
-                labels: {!! json_encode(array_keys($distribucionEdad)) !!},
+                labels: <?php echo json_encode(array_keys($distribucionEdad)); ?>,
                 datasets: [{
                     label: 'Pacientes por Rango de Edad',
-                    data: {!! json_encode(array_values($distribucionEdad)) !!},
+                    data: <?php echo json_encode(array_values($distribucionEdad)); ?>,
                     backgroundColor: [
                         '#4f46e5', '#7c3aed', '#a855f7', 
                         '#c026d3', '#db2777', '#e11d48'
@@ -223,73 +232,77 @@
 
             // Configuración del gráfico de barras
             const ctx = document.getElementById('ageDistributionChart').getContext('2d');
-            const ageChart = new Chart(ctx, {
-                type: 'bar',
-                data: distributionData,
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            display: false
+            if (ctx) {
+                const ageChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: distributionData,
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'Pacientes: ' + context.parsed.y;
+                                    }
+                                }
+                            }
                         },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return `Pacientes: ${context.parsed.y}`;
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
                                 }
                             }
                         }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 1
-                            }
-                        }
                     }
-                }
-            });
+                });
+            }
 
             // Sistema de tema oscuro/claro
             const themeToggle = document.getElementById('theme-toggle');
-            const themeIcon = themeToggle.querySelector('i');
-            const themeText = themeToggle.querySelector('.theme-text');
-            const currentThemeSpan = document.getElementById('current-theme');
-            
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            
-            if (savedTheme === 'dark' || (savedTheme === 'system' && systemPrefersDark)) {
-                enableDarkMode();
-            } else {
-                enableLightMode();
-            }
-            
-            themeToggle.addEventListener('click', function() {
-                if (document.body.classList.contains('dark-theme')) {
-                    enableLightMode();
-                } else {
+            if (themeToggle) {
+                const themeIcon = themeToggle.querySelector('i');
+                const themeText = themeToggle.querySelector('.theme-text');
+                const currentThemeSpan = document.getElementById('current-theme');
+                
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                
+                if (savedTheme === 'dark' || (savedTheme === 'system' && systemPrefersDark)) {
                     enableDarkMode();
+                } else {
+                    enableLightMode();
                 }
-            });
-            
-            function enableDarkMode() {
-                document.body.classList.add('dark-theme');
-                document.body.classList.remove('light-theme');
-                themeIcon.className = 'fas fa-sun';
-                themeText.textContent = 'Modo Claro';
-                currentThemeSpan.textContent = 'Oscuro';
-                localStorage.setItem('theme', 'dark');
-            }
-            
-            function enableLightMode() {
-                document.body.classList.add('light-theme');
-                document.body.classList.remove('dark-theme');
-                themeIcon.className = 'fas fa-moon';
-                themeText.textContent = 'Modo Oscuro';
-                currentThemeSpan.textContent = 'Claro';
-                localStorage.setItem('theme', 'light');
+                
+                themeToggle.addEventListener('click', function() {
+                    if (document.body.classList.contains('dark-theme')) {
+                        enableLightMode();
+                    } else {
+                        enableDarkMode();
+                    }
+                });
+                
+                function enableDarkMode() {
+                    document.body.classList.add('dark-theme');
+                    document.body.classList.remove('light-theme');
+                    if (themeIcon) themeIcon.className = 'fas fa-sun';
+                    if (themeText) themeText.textContent = 'Modo Claro';
+                    if (currentThemeSpan) currentThemeSpan.textContent = 'Oscuro';
+                    localStorage.setItem('theme', 'dark');
+                }
+                
+                function enableLightMode() {
+                    document.body.classList.add('light-theme');
+                    document.body.classList.remove('dark-theme');
+                    if (themeIcon) themeIcon.className = 'fas fa-moon';
+                    if (themeText) themeText.textContent = 'Modo Oscuro';
+                    if (currentThemeSpan) currentThemeSpan.textContent = 'Claro';
+                    localStorage.setItem('theme', 'light');
+                }
             }
         });
     </script>
