@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Pacientes - GINPAC-SOAP</title>
-    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    <link rel="stylesheet" href="<?php echo asset('css/style.css'); ?>">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* Estilos mejorados para la tabla */
@@ -286,6 +286,11 @@
         .patient-row {
             transition: all 0.3s ease;
         }
+
+        /* Formularios en línea */
+        .delete-form {
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -301,13 +306,13 @@
             <p>Gestión y administración de pacientes registrados</p>
             
             <div class="header-actions">
-                <a href="{{ route('pacientes.create') }}" class="btn btn-primary">
+                <a href="<?php echo route('pacientes.create'); ?>" class="btn btn-primary">
                     <i class="fas fa-user-plus"></i> Nuevo Paciente
                 </a>
-                <a href="{{ route('pacientes.export') }}" class="btn btn-export">
+                <a href="<?php echo route('pacientes.export'); ?>" class="btn btn-export">
                     <i class="fas fa-file-export"></i> Exportar CSV
                 </a>
-                <a href="{{ route('pacientes.index') }}" class="btn btn-back">
+                <a href="<?php echo route('pacientes.index'); ?>" class="btn btn-back">
                     <i class="fas fa-home"></i> Volver al Inicio
                 </a>
             </div>
@@ -321,26 +326,26 @@
                     <input type="text" id="searchInput" placeholder="Buscar pacientes por cédula, nombre, apellido o teléfono...">
                 </div>
                 <div class="search-stats">
-                    <span id="resultCount">{{ count($pacientes) }}</span> pacientes encontrados de {{ count($pacientes) }} totales
+                    <span id="resultCount"><?php echo count($pacientes); ?></span> pacientes encontrados de <?php echo count($pacientes); ?> totales
                 </div>
             </div>
 
             <!-- Alertas -->
-            @if(session('success'))
+            <?php if(session('success')): ?>
                 <div class="alert alert-success">
-                    <i class="fas fa-check-circle"></i> {{ session('success') }}
+                    <i class="fas fa-check-circle"></i> <?php echo session('success'); ?>
                 </div>
-            @endif
+            <?php endif; ?>
             
-            @if(session('error'))
+            <?php if(session('error')): ?>
                 <div class="alert alert-error">
-                    <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
+                    <i class="fas fa-exclamation-circle"></i> <?php echo session('error'); ?>
                 </div>
-            @endif
+            <?php endif; ?>
 
             <!-- Tabla de Pacientes -->
             <div class="table-container">
-                @if(count($pacientes) > 0)
+                <?php if(count($pacientes) > 0): ?>
                     <table class="patient-table">
                         <thead>
                             <tr>
@@ -354,71 +359,71 @@
                             </tr>
                         </thead>
                         <tbody id="patientsTableBody">
-                            @foreach($pacientes as $paciente)
-                                <tr class="patient-row" data-search="{{ strtolower($paciente['cedula'] . ' ' . $paciente['nombres'] . ' ' . $paciente['apellidos'] . ' ' . $paciente['telefono']) }}">
+                            <?php foreach($pacientes as $paciente): ?>
+                                <tr class="patient-row" data-search="<?php echo strtolower($paciente['cedula'] . ' ' . $paciente['nombres'] . ' ' . $paciente['apellidos'] . ' ' . $paciente['telefono']); ?>">
                                     <td class="cedula-cell">
-                                        <i class="fas fa-fingerprint"></i> {{ $paciente['cedula'] }}
+                                        <i class="fas fa-fingerprint"></i> <?php echo $paciente['cedula']; ?>
                                     </td>
-                                    <td class="name-cell">{{ $paciente['nombres'] }}</td>
-                                    <td class="name-cell">{{ $paciente['apellidos'] }}</td>
+                                    <td class="name-cell"><?php echo $paciente['nombres']; ?></td>
+                                    <td class="name-cell"><?php echo $paciente['apellidos']; ?></td>
                                     <td class="phone-cell">
-                                        <i class="fas fa-phone"></i> {{ $paciente['telefono'] }}
+                                        <i class="fas fa-phone"></i> <?php echo $paciente['telefono']; ?>
                                     </td>
                                     <td class="date-cell">
                                         <i class="fas fa-calendar-alt"></i> 
-                                        @if(!empty($paciente['fecha_nacimiento']))
-                                            {{ \Carbon\Carbon::parse($paciente['fecha_nacimiento'])->format('d/m/Y') }}
-                                        @else
+                                        <?php if(!empty($paciente['fecha_nacimiento'])): ?>
+                                            <?php echo \Carbon\Carbon::parse($paciente['fecha_nacimiento'])->format('d/m/Y'); ?>
+                                        <?php else: ?>
                                             N/A
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                     <td class="age-cell">
-                                        @if(!empty($paciente['fecha_nacimiento']))
-                                            @php
-                                                try {
-                                                    $fechaNac = new DateTime($paciente['fecha_nacimiento']);
-                                                    $hoy = new DateTime();
-                                                    $edad = $hoy->diff($fechaNac)->y;
-                                                    echo $edad . ' años';
-                                                } catch (Exception $e) {
-                                                    echo 'N/A';
-                                                }
-                                            @endphp
-                                        @else
+                                        <?php if(!empty($paciente['fecha_nacimiento'])): ?>
+                                            <?php
+                                            try {
+                                                $fechaNac = new DateTime($paciente['fecha_nacimiento']);
+                                                $hoy = new DateTime();
+                                                $edad = $hoy->diff($fechaNac)->y;
+                                                echo $edad . ' años';
+                                            } catch (Exception $e) {
+                                                echo 'N/A';
+                                            }
+                                            ?>
+                                        <?php else: ?>
                                             N/A
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                     <td class="actions-cell">
-                                        <a href="{{ route('pacientes.edit', $paciente['cedula']) }}" 
+                                        <a href="<?php echo route('pacientes.edit', $paciente['cedula']); ?>" 
                                            class="btn btn-edit" 
                                            title="Editar paciente">
                                             <i class="fas fa-edit"></i> Editar
                                         </a>
-                                        <form action="{{ route('pacientes.destroy', $paciente['cedula']) }}" 
+                                        <form action="<?php echo route('pacientes.destroy', $paciente['cedula']); ?>" 
                                               method="POST" 
                                               class="delete-form"
-                                              onsubmit="return confirm('¿Está seguro de eliminar al paciente <?php echo $paciente['nombres']; ?> <?php echo $paciente['apellidos']; ?>?')"
-                                            @csrf
-                                            @method('DELETE')
+                                              onsubmit="return confirm('¿Está seguro de eliminar al paciente <?php echo $paciente['nombres']; ?> <?php echo $paciente['apellidos']; ?>?')">
+                                            <?php echo csrf_field(); ?>
+                                            <input type="hidden" name="_method" value="DELETE">
                                             <button type="submit" class="btn btn-delete" title="Eliminar paciente">
                                                 <i class="fas fa-trash"></i> Eliminar
                                             </button>
                                         </form>
                                     </td>
                                 </tr>
-                            @endforeach
+                            <?php endforeach; ?>
                         </tbody>
                     </table>
-                @else
+                <?php else: ?>
                     <div class="empty-state">
                         <i class="fas fa-users-slash"></i>
                         <h3>No hay pacientes registrados</h3>
                         <p>Comience agregando el primer paciente al sistema</p>
-                        <a href="{{ route('pacientes.create') }}" class="btn btn-primary">
+                        <a href="<?php echo route('pacientes.create'); ?>" class="btn btn-primary">
                             <i class="fas fa-user-plus"></i> Registrar Primer Paciente
                         </a>
                     </div>
-                @endif
+                <?php endif; ?>
             </div>
         </main>
         
@@ -430,6 +435,7 @@
 
     <!-- Script para el sistema de búsqueda CORREGIDO -->
     <script>
+        // @ts-nocheck
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('searchInput');
             const patientRows = document.querySelectorAll('.patient-row');
@@ -535,6 +541,25 @@
                 row.addEventListener('mouseleave', function() {
                     this.style.transform = 'translateY(0)';
                     this.style.boxShadow = 'none';
+                });
+            });
+
+            // Manejar eliminación con feedback visual
+            const deleteForms = document.querySelectorAll('.delete-form');
+            deleteForms.forEach(function(form) {
+                form.addEventListener('submit', function(e) {
+                    const button = this.querySelector('button[type="submit"]');
+                    const originalText = button.innerHTML;
+                    
+                    // Mostrar estado de carga
+                    button.disabled = true;
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
+                    
+                    // Permitir que el formulario se envíe
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }, 3000);
                 });
             });
         });
