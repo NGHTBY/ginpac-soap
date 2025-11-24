@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Services\PacienteService;
 
 class SoapServerController extends Controller
 {
@@ -24,8 +23,8 @@ class SoapServerController extends Controller
                 'cache_wsdl' => WSDL_CACHE_NONE,
             ]);
 
-            // Asigna la clase del servicio
-            $server->setClass(PacienteService::class);
+            // Usar la clase del controlador directamente
+            $server->setClass(\App\Http\Controllers\PacienteController::class);
 
             // Captura y devuelve la respuesta SOAP
             ob_start();
