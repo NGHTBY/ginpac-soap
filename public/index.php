@@ -1,32 +1,26 @@
 <?php
 /**
  * Punto de entrada principal para Laragon
- * Este archivo simula el comportamiento de Laravel para el proyecto SOAP
+ * Maneja tanto SOAP como rutas web de Laravel
  */
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-// Simular el funcionamiento básico de Laravel para el proyecto
+// Capturar request UNA sola vez
 $request = Illuminate\Http\Request::capture();
-
-// Manejar rutas básicas
 $path = $request->path();
 
-if ($path === 'soap-server.php') {
-    require_once __DIR__ . '/../soap/SoapServer.php';
+// Manejar ruta SOAP específica
+if ($path === 'soap-server.php' || $path === 'public/soap-server.php') {
+    require_once __DIR__ . '/soap-server.php'; // Ruta CORREGIDA
     exit;
 }
 
-// Para otras rutas, usar el sistema de rutas de Laravel
+// Para todas las demás rutas, usar Laravel normal
 require_once __DIR__ . '/../bootstrap/app.php';
 
 $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
-
-$response = $kernel->handle(
-    $request = Illuminate\Http\Request::capture()
-);
-
+$response = $kernel->handle($request); // Usar la misma request
 $response->send();
-
 $kernel->terminate($request, $response);
 ?>
