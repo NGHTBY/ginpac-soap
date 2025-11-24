@@ -172,22 +172,25 @@ class PacienteController extends Controller
 
                     $xml = simplexml_load_file($this->xmlFile);
                     $encontrado = false;
-                    $i = 0;
 
+                    // Buscar el paciente por cédula
                     foreach ($xml->paciente as $paciente) {
                         if ((string)$paciente->cedula === $cedula) {
-                            unset($xml->paciente[$i]);
+                            // Método correcto para eliminar nodos en SimpleXML
+                            $dom = dom_import_simplexml($paciente);
+                            $dom->parentNode->removeChild($dom);
                             $encontrado = true;
                             break;
                         }
-                        $i++;
                     }
 
                     if ($encontrado) {
+                        // Guardar el XML modificado
                         return $xml->asXML($this->xmlFile);
                     }
 
                     return false;
+                    
                 } catch (\Exception $e) {
                     error_log("Error al eliminar paciente: " . $e->getMessage());
                     return false;
@@ -879,4 +882,3 @@ class PacienteController extends Controller
     }
 
 } // cierre de la clase PacienteController
-
