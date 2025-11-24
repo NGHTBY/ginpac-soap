@@ -1,3 +1,4 @@
+web.php:
 <?php
 
 use App\Http\Controllers\PacienteController;
@@ -31,29 +32,33 @@ Route::put('/editar/{cedula}', [PacienteController::class, 'update'])->name('pac
 Route::delete('/eliminar/{cedula}', [PacienteController::class, 'destroy'])->name('pacientes.destroy');
 
 // ===============================================
-// RF-11: Sistema de Backups
+// RF-11: Sistema de Backups - RUTAS ACTUALIZADAS
 // ===============================================
 
-// Crear backup
-Route::get('/backup/crear', [PacienteController::class, 'backupPacientes'])->name('backup.crear');
+// Vista principal de backups
+Route::get('/backups', [PacienteController::class, 'backupsView'])->name('backup.listar');
 
-// Listar backups disponibles
-Route::get('/backup/listar', [PacienteController::class, 'listarBackups'])->name('backup.listar');
+// Crear backup
+Route::post('/backups/crear', [PacienteController::class, 'backupPacientes'])->name('backup.crear');
+
+// Listar backups disponibles (API JSON)
+Route::get('/backups/listar', [PacienteController::class, 'listarBackups'])->name('backup.listar.api');
 
 // Restaurar backup seleccionado
-Route::post('/backup/restaurar', [PacienteController::class, 'restaurarBackup'])->name('backup.restaurar');
+Route::post('/backups/restaurar', [PacienteController::class, 'restaurarBackup'])->name('backup.restaurar');
 
 // Backup automático
-Route::get('/backup/automatico', [PacienteController::class, 'backupAutomatico'])->name('backup.automatico');
+Route::get('/backups/automatico', [PacienteController::class, 'backupAutomatico'])->name('backup.automatico');
+
+// NUEVA RUTA PARA DESCARGAR BACKUPS
+Route::get('/backups/descargar/{archivo}', [PacienteController::class, 'descargarBackup'])->name('backup.descargar');
 
 // ===============================================
 // Rutas Técnicas del Servidor SOAP
 // ===============================================
 
-// Ruta directa al servidor SOAP (para testing y WSDL)
-Route::get('/soap-server', function() {
-    require_once public_path('soap-server.php');
-});
+// Ruta para el servidor SOAP
+Route::post('/soap-server', [\App\Http\Controllers\SoapServerController::class, 'handle'])->name('soap.handle');
 
 // Ruta para ver el WSDL directamente
 Route::get('/wsdl', function() {
@@ -68,5 +73,3 @@ Route::get('/wsdl', function() {
 // Exportación masiva
 Route::get('/exportar-pacientes', [PacienteController::class, 'exportPacientes'])
     ->name('pacientes.export');
-
-?>
