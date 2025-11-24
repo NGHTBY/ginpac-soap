@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Controlador principal para la gestión de pacientes
@@ -222,11 +223,40 @@ class PacienteController extends Controller
     }
 
     /**
+     * Vista principal de gestión de backups
+     */
+    public function backupsView()
+    {
+        return view('backups');
+    }
+
+    /**
      * Form para crear paciente
      */
     public function create()
     {
         return view('crear');
+    }
+
+    /**
+     * Listar pacientes
+     */
+    public function list()
+    {
+        $pacientes = $this->soapClient->listarPacientes();
+        return view('listar', compact('pacientes'));
+    }
+
+    /**
+     * Form para editar paciente
+     */
+    public function edit($cedula)
+    {
+        $paciente = $this->soapClient->buscarPaciente($cedula);
+        if (!$paciente) {
+            return redirect()->route('pacientes.list')->with('error', 'Paciente no encontrado');
+        }
+        return view('editar', compact('paciente'));
     }
 
     /**
@@ -389,14 +419,16 @@ class PacienteController extends Controller
     }
 
     /**
-     * Exporta todos los pacientes a formato CSV
+     * Exporta todos los pacientes a formato CSV (CORREGIDO para caracteres especiales)
      */
     public function exportPacientes()
     {
         try {
             $pacientes = $this->soapClient->listarPacientes();
 
-            $csvData = "Cédula,Nombres,Apellidos,Teléfono,Fecha Nacimiento,Edad\n";
+            // Agregar BOM (Byte Order Mark) para UTF-8 en Excel
+            $csvData = "\xEF\xBB\xBF"; // BOM para UTF-8
+            $csvData .= "Cédula,Nombres,Apellidos,Teléfono,Fecha Nacimiento,Edad\n";
 
             foreach ($pacientes as $paciente) {
                 // manejar caso sin fecha de nacimiento
@@ -437,12 +469,12 @@ class PacienteController extends Controller
         }
     }
 
-    /* ========================= BLOQUE DE BACKUPS (insertado aquí) ========================= */
+    /* ========================= BLOQUE DE BACKUPS ========================= */
 
     /**
      * Realiza backup de los datos de pacientes
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function backupPacientes()
     {
@@ -470,7 +502,9 @@ class PacienteController extends Controller
             $backupFilePath = $backupDir . '/' . $backupFileName;
 
             // Crear backup
-            file_put_contents($backupFilePath, $xmlContent);
+            if (file_put_contents($backupFilePath, $xmlContent) === false) {
+                throw new \Exception('No se pudo escribir el archivo de backup');
+            }
 
             // Crear archivo de metadatos del backup (append histórico)
             $metadataFile = $backupDir . '/backup_metadata.json';
@@ -512,9 +546,9 @@ class PacienteController extends Controller
     }
 
     /**
-     * Lista todos los backups disponibles
+     * Lista todos los backups disponibles (API JSON)
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function listarBackups()
     {
@@ -526,14 +560,18 @@ class PacienteController extends Controller
                 $files = scandir($backupDir);
 
                 foreach ($files as $file) {
+                    if ($file === '.' || $file === '..') continue;
+                    
                     if (pathinfo($file, PATHINFO_EXTENSION) === 'xml' && strpos($file, 'pacientes_backup_') === 0) {
                         $filePath = $backupDir . '/' . $file;
-                        $backups[] = [
-                            'nombre' => $file,
-                            'fecha' => date('Y-m-d H:i:s', filemtime($filePath)),
-                            'tamaño' => $this->formatBytes(filesize($filePath)),
-                            'ruta' => $filePath
-                        ];
+                        if (file_exists($filePath)) {
+                            $backups[] = [
+                                'nombre' => $file,
+                                'fecha' => date('Y-m-d H:i:s', filemtime($filePath)),
+                                'tamaño' => $this->formatBytes(filesize($filePath)),
+                                'ruta' => $filePath
+                            ];
+                        }
                     }
                 }
 
@@ -550,9 +588,12 @@ class PacienteController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            Log::error('Error al listar backups: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Error al listar backups: ' . $e->getMessage()
+                'message' => 'Error al listar backups: ' . $e->getMessage(),
+                'backups' => [],
+                'total' => 0
             ], 500);
         }
     }
@@ -561,7 +602,7 @@ class PacienteController extends Controller
      * Restaura un backup específico
      *
      * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function restaurarBackup(Request $request)
     {
@@ -591,7 +632,9 @@ class PacienteController extends Controller
             }
 
             // Restaurar el backup
-            file_put_contents(public_path('pacientes.xml'), $backupContent);
+            if (file_put_contents(public_path('pacientes.xml'), $backupContent) === false) {
+                throw new \Exception('No se pudo escribir el archivo de pacientes');
+            }
 
             // Log de restauración exitosa
             $this->logActivity('Backup restaurado exitosamente', "Archivo: {$request->backup_file}");
@@ -609,6 +652,53 @@ class PacienteController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error al restaurar backup: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Descarga un archivo de backup específico
+     *
+     * @param string $archivo
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse|\Illuminate\Http\JsonResponse
+     */
+    public function descargarBackup($archivo)
+    {
+        try {
+            $backupDir = storage_path('backups');
+            $backupFile = $backupDir . '/' . $archivo;
+
+            // Validar que el archivo existe
+            if (!file_exists($backupFile)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El archivo de backup no existe'
+                ], 404);
+            }
+
+            // Validar que es un archivo XML de backup (seguridad)
+            if (pathinfo($archivo, PATHINFO_EXTENSION) !== 'xml' || strpos($archivo, 'pacientes_backup_') !== 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Archivo no válido'
+                ], 400);
+            }
+
+            // Log de descarga
+            $this->logActivity('Backup descargado', "Archivo: {$archivo}");
+
+            // Descargar el archivo
+            return response()->download($backupFile, $archivo, [
+                'Content-Type' => 'application/xml',
+                'Content-Disposition' => 'attachment; filename="' . $archivo . '"'
+            ]);
+
+        } catch (\Exception $e) {
+            $this->logActivity('Error al descargar backup', $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al descargar backup: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -645,7 +735,10 @@ class PacienteController extends Controller
 
         } catch (\Exception $e) {
             $this->logActivity('Error en backup automático', $e->getMessage());
-            return false;
+            return response()->json([
+                'success' => false,
+                'message' => 'Error en backup automático: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -765,12 +858,17 @@ class PacienteController extends Controller
     }
 
     /**
-     * Sanitiza datos para formato CSV
+     * Sanitiza datos para formato CSV (MEJORADO para caracteres especiales)
      */
     private function sanitizeForCSV($data)
     {
         if ($data === null) {
             return '';
+        }
+
+        // Convertir a UTF-8 si no lo está
+        if (!mb_detect_encoding($data, 'UTF-8', true)) {
+            $data = utf8_encode($data);
         }
 
         $data = str_replace('"', '""', $data);
